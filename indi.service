@@ -1,0 +1,13 @@
+[Unit]
+Description=INDI server
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStart=/usr/bin/docker run --privileged --rm -p 8624:8624 -p 7624:7624 --name indi indi:2.1.0
+ExecStop=/usr/bin/docker container stop indi
+
+[Install]
+WantedBy=multi-user.target
