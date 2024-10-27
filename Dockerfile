@@ -18,6 +18,11 @@ RUN cmake . -DCMAKE_INSTALL_PREFIX=/opt/indi -DUDEVRULES_INSTALL_DIR=/opt/indi/u
 WORKDIR /indi-build
 RUN git clone https://github.com/indilib/indi-3rdparty.git --depth 1 --branch v2.1.0
 
+# install eqmod driver
+FROM indi-builder AS indi-driver-eqmod
+WORKDIR /indi-build/indi-3rdparty/indi-eqmod
+RUN cmake . -DCMAKE_PREFIX_PATH=/opt/indi -DCMAKE_INSTALL_PREFIX=/opt/indi-eqmod -DINDI_DATA_DIR=/opt/indi-eqmod/share/indi && make && make install
+
 # install svbony driver
 FROM indi-builder AS indi-driver-svbony
 WORKDIR /indi-build/indi-3rdparty/libsvbony
@@ -97,8 +102,10 @@ COPY --from=indi-driver-svbony /opt/indi-svbony /opt/indi
 COPY --from=indi-driver-toupcam /opt/indi-toupcam /opt/indi
 COPY --from=indi-driver-qhy /opt/indi-qhy /opt/indi
 COPY --from=indi-driver-zwo /opt/indi-zwo /opt/indi
+COPY --from=indi-driver-eqmod /opt/indi-eqmod /opt/indi
 
 # make archive with udev rules
 WORKDIR /opt/indi/udev-rules
 RUN tar cvf /opt/indi/rules.tar *
 WORKDIR /opt/indi/
+
